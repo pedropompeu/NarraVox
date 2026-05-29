@@ -1,26 +1,135 @@
 @import "tailwindcss";
 
+/* ── Color tokens — NarraVox Tátil ─────────────────────── */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Inks */
+  --ink:      #2A1D14;
+  --ink-2:    #4A382B;
+  --ink-3:    #6B5544;
+  --ink-muted:#9A8775;
+
+  /* Apple (play button) */
+  --apple-hi:   #FF7A6E;
+  --apple-mid:  #D32F2F;
+  --apple-low:  #9B1717;
+  --apple-deep: #5E0A0A;
+
+  /* Brass & Gold */
+  --brass:       #B8860B;
+  --brass-light: #E0B453;
+  --brass-deep:  #7F5C05;
+  --gold:        #F4C859;
+
+  /* Glass accent */
+  --glass: #3B82F6;
+
+  /* Surface base colors */
+  --paper:      #F5F3EF;
+  --paper-edge: #E8E2D6;
+  --linen-warm: #EFE6D5;
+  --wood:       #D4A574;
+  --wood-deep:  #A07748;
+  --wood-edge:  #85603A;
+  --ceramic:    #E8DCC8;
+  --concrete:   #A8A095;
+  --ash:        #37312A;
+
+  /* Semantic aliases */
+  --accent-primary: var(--glass);
+  --status-error:   #C5390A;
+  --status-success: #3F7A1F;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* ── Dark mode overrides ────────────────────────────────── */
+[data-theme="dark"] {
+  --ink:       #EDE0CE;
+  --ink-2:     #C8B49C;
+  --ink-3:     #9A8272;
+  --ink-muted: #6A5E52;
+
+  --paper:      #1A1410;
+  --paper-edge: #24190F;
+  --linen-warm: #1F1610;
+  --ceramic:    #2E2218;
+  --concrete:   #6A645C;
+  --ash:        #C8B49C;
+
+  --glass: #60A5FA;
+  --accent-primary: #60A5FA;
+  --status-error:   #F87171;
+  --status-success: #86EFAC;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* ── Fonts ──────────────────────────────────────────────── */
+@theme {
+  --font-serif: var(--font-fraunces), 'Cormorant Garamond', Georgia, serif;
+  --font-sans:  var(--font-inter), -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
 }
 
+/* ── Reset & base ───────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+html, body { height: 100%; }
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Animations ─────────────────────────────────────────── */
+@keyframes tx-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.75; }
+}
+
+@keyframes narravox-spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes narravox-slide {
+  0%   { left: -40%; width: 40%; }
+  60%  { left: 20%;  width: 80%; }
+  100% { left: 100%; width: 40%; }
+}
+
+.spin {
+  display: inline-block;
+  animation: narravox-spin 0.7s linear infinite;
+}
+
+.loading-bar {
+  position: relative;
+  overflow: hidden;
+  height: 3px;
+  background-color: var(--paper-edge);
+  border-radius: 9999px;
+}
+.loading-bar::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  height: 100%;
+  background: linear-gradient(90deg, var(--glass), #74A7FB);
+  border-radius: 9999px;
+  animation: narravox-slide 1.4s ease-in-out infinite;
+}
+
+/* ── Focus ring ─────────────────────────────────────────── */
+:focus-visible {
+  outline: 3px solid rgba(59, 130, 246, 0.25);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ── Scrollbar ──────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--linen-warm); border-radius: 3px; }
+
+/* ── Reduced motion ─────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }

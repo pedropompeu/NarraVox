@@ -1,0 +1,256 @@
+/* ============================================================
+   NarraVox — Design Tokens
+   v1.0 · 2026-05-26
+   Tier 1: Primitivos → Tier 2: Semânticos → Tier 3: Componentes
+   ============================================================ */
+
+/* ----------------------------------------------------------
+   TIER 1 — PRIMITIVOS
+   Valores brutos. Nunca referenciar diretamente em componentes.
+   ---------------------------------------------------------- */
+:root {
+  /* Blues */
+  --color-blue-50: #EFF6FF;
+  --color-blue-100: #DBEAFE;
+  --color-blue-200: #BFDBFE;
+  --color-blue-400: #60A5FA;
+  --color-blue-500: #3B82F6;
+  --color-blue-600: #2563EB;
+  --color-blue-700: #1D4ED8;
+
+  /* Slate (escala de cinza principal) */
+  --color-slate-50: #F8FAFC;
+  --color-slate-100: #F1F5F9;
+  --color-slate-200: #E2E8F0;
+  --color-slate-300: #CBD5E1;
+  --color-slate-400: #94A3B8;
+  --color-slate-500: #64748B;
+  --color-slate-600: #475569;
+  --color-slate-700: #334155;
+  --color-slate-800: #1E293B;
+  --color-slate-900: #0F172A;
+
+  /* Neutros absolutos */
+  --color-white: #FFFFFF;
+  --color-off-white: #F9F8F6; /* temperatura de papel — não branco puro */
+
+  /* Status */
+  --color-emerald-100: #D1FAE5;
+  --color-emerald-500: #10B981;
+  --color-red-100: #FEE2E2;
+  --color-red-500: #EF4444;
+  --color-amber-100: #FEF3C7;
+  --color-amber-500: #F59E0B;
+
+  /* Tipografia */
+  --font-primary: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  --font-mono: 'Geist Mono', 'Fira Code', monospace;
+
+  /* Escala tipográfica */
+  --text-xs: 0.75rem;    /* 12px */
+  --text-sm: 0.875rem;   /* 14px */
+  --text-base: 1rem;     /* 16px */
+  --text-lg: 1.125rem;   /* 18px — body de leitura */
+  --text-xl: 1.25rem;    /* 20px */
+  --text-2xl: 1.5rem;    /* 24px */
+  --text-3xl: 1.875rem;  /* 30px */
+  --text-4xl: 2.25rem;   /* 36px */
+
+  /* Pesos */
+  --font-regular: 400;
+  --font-medium: 500;
+  --font-semibold: 600;
+  --font-bold: 700;
+
+  /* Espaçamento (base-4 system) */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-20: 5rem;
+  --space-24: 6rem;
+
+  /* Border radius */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;      /* máximo em containers */
+  --radius-full: 9999px;
+
+  /* Sombras mínimas */
+  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06);
+  --shadow-md: 0 2px 8px rgba(15, 23, 42, 0.08);
+
+  /* Motion */
+  --duration-fast: 100ms;
+  --duration-base: 150ms;
+  --duration-slow: 250ms;
+  --ease-default: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+}
+
+/* ----------------------------------------------------------
+   TIER 2 — SEMÂNTICOS
+   Aliases com intenção. Usar estes em componentes.
+   ---------------------------------------------------------- */
+:root {
+  /* Backgrounds */
+  --bg-page: var(--color-off-white);
+  --bg-surface: var(--color-white);
+  --bg-surface-raised: var(--color-white);
+  --bg-muted: var(--color-slate-100);
+  --bg-inverse: var(--color-slate-900);
+  --bg-accent: var(--color-blue-50);
+
+  /* Texto */
+  --text-primary: var(--color-slate-900);
+  --text-secondary: var(--color-slate-600);
+  --text-muted: var(--color-slate-400);
+  --text-inverse: var(--color-white);
+  --text-accent: var(--color-blue-600);
+  --text-placeholder: var(--color-slate-400);
+
+  /* Bordas */
+  --border-default: var(--color-slate-200);
+  --border-strong: var(--color-slate-300);
+  --border-accent: var(--color-blue-300);
+  --border-focus: var(--color-blue-500);
+
+  /* Acento */
+  --accent-primary: var(--color-blue-500);
+  --accent-primary-hover: var(--color-blue-600);
+  --accent-primary-active: var(--color-blue-700);
+  --accent-primary-subtle: var(--color-blue-50);
+
+  /* Word Highlighting — feature central */
+  --highlight-word-bg: var(--color-blue-100);
+  --highlight-word-text: var(--color-blue-700);
+  --highlight-word-border: var(--color-blue-200);
+
+  /* Status */
+  --status-success: var(--color-emerald-500);
+  --status-success-bg: var(--color-emerald-100);
+  --status-error: var(--color-red-500);
+  --status-error-bg: var(--color-red-100);
+  --status-warning: var(--color-amber-500);
+  --status-warning-bg: var(--color-amber-100);
+}
+
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-page: var(--color-slate-900);
+    --bg-surface: var(--color-slate-800);
+    --bg-surface-raised: var(--color-slate-700);
+    --bg-muted: var(--color-slate-800);
+    --bg-accent: rgba(59, 130, 246, 0.1);
+
+    --text-primary: var(--color-slate-50);
+    --text-secondary: var(--color-slate-300);
+    --text-muted: var(--color-slate-500);
+    --text-accent: var(--color-blue-400);
+
+    --border-default: var(--color-slate-700);
+    --border-strong: var(--color-slate-600);
+    --border-focus: var(--color-blue-400);
+
+    --accent-primary: var(--color-blue-400);
+    --accent-primary-hover: var(--color-blue-300);
+    --accent-primary-active: var(--color-blue-200);
+
+    --highlight-word-bg: rgba(59, 130, 246, 0.2);
+    --highlight-word-text: var(--color-blue-300);
+    --highlight-word-border: rgba(59, 130, 246, 0.3);
+
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.4);
+  }
+}
+
+/* ----------------------------------------------------------
+   TIER 3 — COMPONENTES
+   Tokens escopados. Zero magic numbers.
+   ---------------------------------------------------------- */
+:root {
+  /* Button Primary */
+  --btn-primary-bg: var(--accent-primary);
+  --btn-primary-bg-hover: var(--accent-primary-hover);
+  --btn-primary-bg-active: var(--accent-primary-active);
+  --btn-primary-bg-disabled: var(--color-slate-200);
+  --btn-primary-text: var(--text-inverse);
+  --btn-primary-text-disabled: var(--text-muted);
+  --btn-primary-radius: var(--radius-md);
+  --btn-primary-px: var(--space-4);
+  --btn-primary-py: var(--space-2);
+  --btn-primary-font-size: var(--text-sm);
+  --btn-primary-font-weight: var(--font-medium);
+
+  /* Button Ghost */
+  --btn-ghost-bg: transparent;
+  --btn-ghost-bg-hover: var(--bg-muted);
+  --btn-ghost-bg-active: var(--color-slate-200);
+  --btn-ghost-text: var(--text-secondary);
+  --btn-ghost-text-hover: var(--text-primary);
+  --btn-ghost-radius: var(--radius-md);
+
+  /* TextEditor */
+  --editor-bg: var(--bg-surface);
+  --editor-border: var(--border-default);
+  --editor-border-focus: var(--border-focus);
+  --editor-text: var(--text-primary);
+  --editor-placeholder: var(--text-placeholder);
+  --editor-font: var(--font-primary);
+  --editor-font-size: var(--text-lg);
+  --editor-line-height: 1.75;
+  --editor-radius: var(--radius-lg);
+  --editor-padding: var(--space-5);
+
+  /* WordHighlighter */
+  --word-default-text: var(--text-primary);
+  --word-highlight-bg: var(--highlight-word-bg);
+  --word-highlight-text: var(--highlight-word-text);
+  --word-highlight-radius: 3px;
+  --word-highlight-px: 2px;
+  --word-highlight-py: 0px;
+  --word-transition: background-color var(--duration-fast) var(--ease-default);
+
+  /* AudioPlayer */
+  --player-bg: var(--bg-surface);
+  --player-border: var(--border-default);
+  --player-radius: var(--radius-lg);
+  --player-padding-x: var(--space-6);
+  --player-padding-y: var(--space-4);
+
+  /* ProgressBar */
+  --progress-track-bg: var(--color-slate-200);
+  --progress-fill-bg: var(--accent-primary);
+  --progress-thumb-color: var(--accent-primary);
+  --progress-thumb-size: 14px;
+  --progress-height: 4px;
+  --progress-radius: var(--radius-full);
+
+  /* HistoryItem */
+  --history-item-bg: var(--bg-surface);
+  --history-item-bg-hover: var(--bg-accent);
+  --history-item-border: var(--border-default);
+  --history-item-radius: var(--radius-md);
+  --history-item-px: var(--space-4);
+  --history-item-py: var(--space-3);
+
+  /* Badge */
+  --badge-bg: var(--bg-muted);
+  --badge-text: var(--text-secondary);
+  --badge-success-bg: var(--status-success-bg);
+  --badge-success-text: var(--color-emerald-500);
+  --badge-radius: var(--radius-full);
+  --badge-px: var(--space-3);
+  --badge-py: var(--space-1);
+  --badge-font-size: var(--text-xs);
+  --badge-font-weight: var(--font-medium);
+}

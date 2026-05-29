@@ -39,3 +39,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+#OUTROS ARQUIVOS
+BRAND.md
+AGENTS.md
+Criacao-projeto-context.md
