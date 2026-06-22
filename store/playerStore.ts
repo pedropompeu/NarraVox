@@ -13,6 +13,7 @@ interface PlayerState {
   elapsedSeconds: number;
   activeHistoryId: string | null;
   rateLimitReason: RateLimitReason;
+  errorMessage: string | null;
 
   setStatus: (s: PlayerStatus) => void;
   setSpeed: (s: number) => void;
@@ -23,6 +24,7 @@ interface PlayerState {
   incrementElapsed: () => void;
   setActiveHistoryId: (id: string | null) => void;
   setRateLimitReason: (r: RateLimitReason) => void;
+  setErrorMessage: (msg: string | null) => void;
   reset: () => void;
 }
 
@@ -35,6 +37,7 @@ export const usePlayerStore = create<PlayerState>((set) => ({
   elapsedSeconds: 0,
   activeHistoryId: null,
   rateLimitReason: null,
+  errorMessage: null,
 
   setStatus: (s) => set({ status: s }),
   setSpeed: (s) => set({ speed: s }),
@@ -45,5 +48,6 @@ export const usePlayerStore = create<PlayerState>((set) => ({
   incrementElapsed: () => set((state) => ({ elapsedSeconds: state.elapsedSeconds + 1 })),
   setActiveHistoryId: (id) => set({ activeHistoryId: id }),
   setRateLimitReason: (r) => set({ rateLimitReason: r }),
-  reset: () => set({ status: "idle", currentWordIndex: -1, elapsedSeconds: 0, rateLimitReason: null }),
+  setErrorMessage: (msg) => set({ errorMessage: msg }),
+  reset: () => set({ status: "idle", currentWordIndex: -1, elapsedSeconds: 0, rateLimitReason: null, errorMessage: null }),
 }));

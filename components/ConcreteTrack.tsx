@@ -1,6 +1,6 @@
 "use client";
 import { useRef } from "react";
-import { M, surface } from "@/lib/designTokens";
+import { surface } from "@/lib/designTokens";
 
 interface ConcreteTrackProps {
   progress: number; // 0–1

@@ -1,7 +1,15 @@
 import { MsEdgeTTS, OUTPUT_FORMAT } from "msedge-tts";
+import { createClient } from "@supabase/supabase-js";
 import { NextRequest } from "next/server";
 import type { Readable } from "node:stream";
 import type { WordTiming } from "@/lib/ttsTypes";
+
+// Singleton do cliente admin Supabase — reutilizado entre invocações da mesma instância serverless
+const supabaseAdmin = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL ?? "",
+  process.env.SUPABASE_SERVICE_ROLE_KEY ?? "",
+  { auth: { autoRefreshToken: false, persistSession: false } }
+);
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -164,17 +172,10 @@ async function isPremiumUser(req: NextRequest): Promise<boolean> {
     const token = auth.slice(7);
 
     // Verifica JWT e busca perfil via service_role (server-only)
-    const { createClient } = await import("@supabase/supabase-js");
-    const admin = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!,
-      { auth: { autoRefreshToken: false, persistSession: false } }
-    );
-
-    const { data: { user }, error } = await admin.auth.getUser(token);
+    const { data: { user }, error } = await supabaseAdmin.auth.getUser(token);
     if (error || !user) return false;
 
-    const { data: profile } = await admin
+    const { data: profile } = await supabaseAdmin
       .from("profiles")
       .select("premium")
       .eq("id", user.id)
@@ -214,14 +215,23 @@ export async function POST(req: NextRequest) {
     }
   }
 
+  let tts: MsEdgeTTS;
   try {
-    const tts = new MsEdgeTTS();
+    tts = new MsEdgeTTS();
     await tts.setMetadata(
       voice ?? "pt-BR-FranciscaNeural",
       OUTPUT_FORMAT.AUDIO_24KHZ_96KBITRATE_MONO_MP3,
       { wordBoundaryEnabled: true }
     );
+  } catch (err) {
+    console.error("[TTS API] setMetadata failed:", err);
+    return new Response("voice not found or unavailable", {
+      status: 422,
+      headers: { "X-Voice-Invalid": "1" },
+    });
+  }
 
+  try {
     const { audioStream, metadataStream } = tts.toStream(text);
 
     const { audioBuffer, timingParts } = await drainTtsStreams(audioStream, metadataStream ?? null);

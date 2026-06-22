@@ -80,18 +80,20 @@ export default function PrivacidadePage() {
         <Link href="/" style={S.back}>← Voltar para o NarraVox</Link>
 
         <h1 style={S.h1}>Política de Privacidade</h1>
-        <p style={S.meta}>Última atualização: maio de 2026</p>
+        <p style={S.meta}>Última atualização: junho de 2026</p>
 
         <div style={S.card}>
 
           {/* Resumo rápido */}
           <section>
-            <h2 style={S.h2}>Resumo em uma linha</h2>
+            <h2 style={S.h2}>Resumo rápido</h2>
             <p style={S.p}>
-              O NarraVox não cria cadastros nem exige login. No modo gratuito, tudo
-              acontece no seu navegador. No modo neural, seu texto é transmitido à
-              Microsoft para gerar o áudio — e devolvido imediatamente. Nada é
-              armazenado fora do seu dispositivo.
+              O NarraVox funciona sem cadastro. O login é <strong>opcional</strong> —
+              ao criar uma conta você desbloqueia sincronização do histórico entre
+              dispositivos e acesso ao plano Premium. No modo gratuito sem login,
+              tudo fica no seu navegador. No modo neural (vozes de alta qualidade),
+              seu texto é transmitido à Microsoft para gerar o áudio e devolvido
+              imediatamente — sem armazenamento no nosso lado.
             </p>
           </section>
 
@@ -137,6 +139,37 @@ export default function PrivacidadePage() {
             </p>
           </section>
 
+          {/* Conta de usuário */}
+          <section>
+            <h2 style={S.h2}>Conta de usuário (opcional)</h2>
+            <p style={S.p}>
+              O NarraVox oferece login com email e senha. A conta é inteiramente
+              opcional — o produto funciona em modo local sem qualquer cadastro.
+            </p>
+            <p style={{ ...S.p, marginTop: 10 }}>
+              Ao criar uma conta, os seguintes dados são armazenados em nossos
+              servidores (Supabase, infraestrutura em nuvem):
+            </p>
+            <ul style={{ ...S.p, marginTop: 8, paddingLeft: 18, display: "flex", flexDirection: "column", gap: 4 }}>
+              <li><strong>Email</strong> — usado para autenticação e recuperação de senha.</li>
+              <li><strong>Nome</strong> (opcional) — informado no cadastro, usado como identificação.</li>
+              <li><strong>Status Premium</strong> — indica se sua conta tem acesso ao plano pago.</li>
+            </ul>
+            <p style={{ ...S.p, marginTop: 10 }}>
+              O histórico de leituras pode ser sincronizado na nuvem quando você
+              está logado, permitindo retomar leituras em qualquer dispositivo.
+              Você pode encerrar sua conta e solicitar exclusão dos dados a qualquer
+              momento pelo email de contato abaixo.
+            </p>
+            <p style={{ ...S.p, marginTop: 10 }}>
+              A autenticação é gerenciada pelo{" "}
+              <a href="https://supabase.com/privacy" target="_blank" rel="noopener noreferrer" style={{ color: "var(--glass)", textDecoration: "none" }}>
+                Supabase
+              </a>
+              {" "}(política de privacidade própria).
+            </p>
+          </section>
+
           {/* localStorage */}
           <section>
             <h2 style={S.h2}>O que fica salvo no seu dispositivo</h2>
@@ -148,7 +181,7 @@ export default function PrivacidadePage() {
               caso de PDFs — a página ativa. Esses dados existem{" "}
               <strong>apenas no seu dispositivo</strong> e nunca são sincronizados
               com servidores. Você pode apagá-los a qualquer momento pelo botão
-              "Limpar histórico" no painel lateral, ou limpando os dados do site nas
+              &ldquo;Limpar histórico&rdquo; no painel lateral, ou limpando os dados do site nas
               configurações do navegador.
             </p>
           </section>

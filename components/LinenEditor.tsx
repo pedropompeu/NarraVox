@@ -47,7 +47,6 @@ function PaperPill({ children }: { children: React.ReactNode }) {
 export function LinenEditor({ value, onChange, onPdfPages, onPdfFile, onPageChange, mobile = false }: LinenEditorProps) {
   const [focused, setFocused] = useState(false);
   const [pdfPages, setPdfPages] = useState<string[] | null>(null);
-  const [totalPdfPages, setTotalPdfPages] = useState(0);
   const [pdfTruncated, setPdfTruncated] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
 
@@ -65,7 +64,6 @@ export function LinenEditor({ value, onChange, onPdfPages, onPdfFile, onPageChan
 
   function handlePdf(pages: string[], totalPages: number, truncated: boolean, file: File) {
     setPdfPages(pages);
-    setTotalPdfPages(totalPages);
     setPdfTruncated(truncated);
     setCurrentPage(0);
     onChange(pages[0] ?? "");

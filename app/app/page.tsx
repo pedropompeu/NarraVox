@@ -27,10 +27,11 @@ import { usePlayerStore } from "@/store/playerStore";
 import type { HistoryItem } from "@/lib/historyUtils";
 
 function useIsMobile(): boolean {
-  const [mobile, setMobile] = useState(false);
+  const [mobile, setMobile] = useState(() =>
+    typeof window !== "undefined" && window.matchMedia("(max-width: 768px)").matches
+  );
   useEffect(() => {
     const mq = window.matchMedia("(max-width: 768px)");
-    setMobile(mq.matches);
     const handler = (e: MediaQueryListEvent) => setMobile(e.matches);
     mq.addEventListener("change", handler);
     return () => mq.removeEventListener("change", handler);
@@ -436,6 +437,8 @@ export default function Home() {
   const isPremium = user?.premium ?? false;
   const rateLimitReason = usePlayerStore((s) => s.rateLimitReason);
   const clearRateLimit = usePlayerStore((s) => s.setRateLimitReason);
+  const errorMessage = usePlayerStore((s) => s.errorMessage);
+  const clearErrorMessage = usePlayerStore((s) => s.setErrorMessage);
   const isPdf = pdfPages.length > 0;
   const player = usePlayer(text, "neural", { isPdf, activePage: isPdf ? activePage : undefined });
 
@@ -451,7 +454,8 @@ export default function Home() {
   const loop = useLoopRange(player.currentWordIndex, player.seekTo);
   const annotations = useAnnotations(player.activeHistoryId, player.words);
 
-  // Dispara tick do loop a cada palavra
+  // Dispara tick do loop a cada palavra — loop intencionalmente omitido das deps (nova referência a cada render)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { loop.tick(); }, [player.currentWordIndex]);
 
   // Pausa automática ao minimizar/trocar de aba
@@ -560,7 +564,7 @@ export default function Home() {
             onBookmark={() => {
               const idx = player.currentWordIndex;
               if (idx < 0) return;
-              bookmarks.isBookmarked(idx) ? bookmarks.remove(idx) : bookmarks.add(idx);
+              if (bookmarks.isBookmarked(idx)) { bookmarks.remove(idx); } else { bookmarks.add(idx); }
             }}
             isBookmarked={bookmarks.isBookmarked(Math.max(0, player.currentWordIndex))}
             mobile
@@ -683,7 +687,7 @@ export default function Home() {
                 onBookmark={() => {
                   const idx = player.currentWordIndex;
                   if (idx < 0) return;
-                  bookmarks.isBookmarked(idx) ? bookmarks.remove(idx) : bookmarks.add(idx);
+                  if (bookmarks.isBookmarked(idx)) { bookmarks.remove(idx); } else { bookmarks.add(idx); }
                 }}
                 isBookmarked={bookmarks.isBookmarked(Math.max(0, player.currentWordIndex))}
               />
@@ -755,6 +759,30 @@ export default function Home() {
         reason={rateLimitReason}
         onDismiss={() => clearRateLimit(null)}
       />
+
+      {/* Banner de erro do TTS (502/503/timeout) */}
+      {errorMessage && (
+        <div role="alert" style={{
+          position: "fixed", bottom: 24, left: "50%", transform: "translateX(-50%)",
+          background: "var(--paper)", border: "1px solid rgba(180,60,60,.35)",
+          borderRadius: 12, padding: "12px 16px",
+          display: "flex", alignItems: "center", gap: 10,
+          boxShadow: "0 4px 20px rgba(0,0,0,.12)",
+          fontFamily: "var(--font-sans)", fontSize: 13, color: "var(--ink)",
+          maxWidth: 360, zIndex: 200,
+        }}>
+          <span style={{ color: "#B43C3C", fontSize: 15 }}>⚠</span>
+          <span style={{ flex: 1, lineHeight: 1.45 }}>{errorMessage}</span>
+          <button
+            onClick={() => clearErrorMessage(null)}
+            aria-label="Fechar"
+            style={{
+              background: "none", border: "none", cursor: "pointer",
+              fontSize: 16, color: "var(--ink-muted)", padding: "0 2px", lineHeight: 1,
+            }}
+          >×</button>
+        </div>
+      )}
 
       {/* Banner modo noturno automático */}
       {showNightBanner && (

@@ -9,16 +9,16 @@ interface SensitiveBannerProps {
 
 export function SensitiveBanner({ text }: SensitiveBannerProps) {
   const [matches, setMatches] = useState<SensitiveMatch[]>([]);
-  const [dismissed, setDismissed] = useState(false);
+  // Rastreia qual texto o usuário dispensou — banner reaparece automaticamente quando o texto muda
+  const [dismissedText, setDismissedText] = useState<string | null>(null);
 
   useEffect(() => {
     // Debounce — só analisa quando o texto estabiliza
-    setDismissed(false);
     const id = setTimeout(() => setMatches(detectSensitive(text)), 600);
     return () => clearTimeout(id);
   }, [text]);
 
-  if (!matches.length || dismissed) return null;
+  if (!matches.length || dismissedText === text) return null;
 
   const labels = matches.map((m) => m.label).join(", ");
 
@@ -69,7 +69,7 @@ export function SensitiveBanner({ text }: SensitiveBannerProps) {
       </div>
 
       <button
-        onClick={() => setDismissed(true)}
+        onClick={() => setDismissedText(text)}
         aria-label="Dispensar aviso"
         style={{
           background: "none",

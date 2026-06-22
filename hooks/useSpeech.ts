@@ -10,9 +10,28 @@ export type SpeechMode = "browser" | "neural";
 
 const CHUNK_SIZE = 400;
 
-function chunkArray<T>(arr: T[], size: number): T[][] {
-  const chunks: T[][] = [];
-  for (let i = 0; i < arr.length; i += size) chunks.push(arr.slice(i, i + size));
+// Divide o array de palavras em chunks, quebrando de preferência após pontuação
+// terminal (.  !  ?) próxima ao limite. Fallback para corte rígido se nenhuma
+// sentença for encontrada na janela de tolerância (50% a 100% do limite).
+function chunkBysentence(words: string[], maxWords: number): string[][] {
+  const chunks: string[][] = [];
+  let start = 0;
+  const sentenceEnd = /[.!?]["'»\])]?$/;
+
+  while (start < words.length) {
+    const end = Math.min(start + maxWords, words.length);
+    if (end === words.length) {
+      chunks.push(words.slice(start, end));
+      break;
+    }
+    // Busca de trás para frente a partir do limite, até 50% do tamanho
+    let cut = end;
+    for (let i = end - 1; i >= start + Math.floor(maxWords / 2); i--) {
+      if (sentenceEnd.test(words[i])) { cut = i + 1; break; }
+    }
+    chunks.push(words.slice(start, cut));
+    start = cut;
+  }
   return chunks;
 }
 
@@ -32,7 +51,7 @@ async function getAccessToken(): Promise<string | null> {
   }
 }
 
-async function fetchChunk(text: string, voiceId: string): Promise<ChunkAudio> {
+async function fetchChunk(text: string, voiceId: string, signal?: AbortSignal): Promise<ChunkAudio> {
   const token = await getAccessToken();
   const headers: Record<string, string> = { "Content-Type": "application/json" };
   if (token) headers["Authorization"] = `Bearer ${token}`;
@@ -41,12 +60,14 @@ async function fetchChunk(text: string, voiceId: string): Promise<ChunkAudio> {
     method: "POST",
     headers,
     body: JSON.stringify({ text, voice: voiceId }),
+    signal,
   });
   if (!res.ok) {
     const msg = await res.text().catch(() => "");
-    const err = new Error(`TTS ${res.status}:${msg}`) as Error & { status: number; premiumRequired: boolean };
+    const err = new Error(`TTS ${res.status}:${msg}`) as Error & { status: number; premiumRequired: boolean; voiceInvalid: boolean };
     err.status = res.status;
     err.premiumRequired = res.headers.get("X-Premium-Required") === "1";
+    err.voiceInvalid = res.headers.get("X-Voice-Invalid") === "1";
     throw err;
   }
   const { audio, timings } = (await res.json()) as { audio: string; timings: WordTiming[] };
@@ -80,6 +101,7 @@ export function useSpeech(words: string[], mode: SpeechMode = "neural") {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const generationRef = useRef(0);
   const blobUrlsRef = useRef<string[]>([]);
+  const abortRef = useRef<AbortController | null>(null);
 
   // Browser mode refs
   const controllerRef = useRef<SpeechController | null>(null);
@@ -159,14 +181,18 @@ export function useSpeech(words: string[], mode: SpeechMode = "neural") {
 
   const speakNeural = async (startIndex = 0): Promise<void> => {
     const gen = ++generationRef.current;
+    abortRef.current?.abort();
     cleanupNeural();
+    const controller = new AbortController();
+    abortRef.current = controller;
+    const signal = controller.signal;
     if (!words.length) return;
 
     store.setStatus("loading");
     store.setCurrentWordIndex(startIndex);
 
     const voiceId = store.selectedVoice ?? DEFAULT_VOICE_ID;
-    const chunks = chunkArray(words, CHUNK_SIZE);
+    const chunks = chunkBysentence(words, CHUNK_SIZE);
 
     let startChunkIdx = 0;
     let chunkWordOffset = 0;
@@ -181,13 +207,19 @@ export function useSpeech(words: string[], mode: SpeechMode = "neural") {
     const seekWithinChunk = startIndex - chunkWordOffset;
     let first: ChunkAudio;
     try {
-      first = await fetchChunk(chunks[startChunkIdx].slice(seekWithinChunk).join(" "), voiceId);
+      first = await fetchChunk(chunks[startChunkIdx].slice(seekWithinChunk).join(" "), voiceId, signal);
     } catch (e) {
+      const err = e as { status?: number; premiumRequired?: boolean; voiceInvalid?: boolean; name?: string };
+      if (err.name === "AbortError") return;
       if (gen === generationRef.current) {
         store.setStatus("idle");
-        const err = e as { status?: number; premiumRequired?: boolean };
         if (err.status === 429) {
           store.setRateLimitReason(err.premiumRequired ? "daily_quota" : "duplicate");
+        } else if (err.voiceInvalid) {
+          store.setVoice(null);
+          store.setErrorMessage("A voz selecionada não está mais disponível. Resetado para a voz padrão.");
+        } else {
+          store.setErrorMessage("Voz neural temporariamente indisponível. Tente o modo navegador.");
         }
       }
       return;
@@ -211,7 +243,7 @@ export function useSpeech(words: string[], mode: SpeechMode = "neural") {
 
       let prefetchNext: Promise<ChunkAudio> | null = nextFetch;
       if (!prefetchNext && chunkIdx + 1 < chunks.length) {
-        prefetchNext = fetchChunk(chunks[chunkIdx + 1].join(" "), voiceId);
+        prefetchNext = fetchChunk(chunks[chunkIdx + 1].join(" "), voiceId, signal);
       }
 
       audio.addEventListener("timeupdate", () => {
@@ -245,15 +277,19 @@ export function useSpeech(words: string[], mode: SpeechMode = "neural") {
 
       let nextChunk: ChunkAudio;
       try {
-        nextChunk = await (prefetchNext ?? fetchChunk(chunks[nextChunkIdx].join(" "), voiceId));
-      } catch {
-        if (gen === generationRef.current) store.setStatus("idle");
+        nextChunk = await (prefetchNext ?? fetchChunk(chunks[nextChunkIdx].join(" "), voiceId, signal));
+      } catch (e) {
+        if ((e as { name?: string }).name === "AbortError") return;
+        if (gen === generationRef.current) {
+          store.setStatus("idle");
+          store.setErrorMessage("Voz neural temporariamente indisponível. Tente o modo navegador.");
+        }
         return;
       }
 
       const prefetchAfter =
         nextChunkIdx + 1 < chunks.length
-          ? fetchChunk(chunks[nextChunkIdx + 1].join(" "), voiceId)
+          ? fetchChunk(chunks[nextChunkIdx + 1].join(" "), voiceId, signal)
           : null;
 
       await playChunk(nextChunkIdx, globalOffset + wordsInChunk, nextChunk, prefetchAfter);
@@ -261,7 +297,7 @@ export function useSpeech(words: string[], mode: SpeechMode = "neural") {
 
     const prefetchSecond =
       startChunkIdx + 1 < chunks.length
-        ? fetchChunk(chunks[startChunkIdx + 1].join(" "), voiceId)
+        ? fetchChunk(chunks[startChunkIdx + 1].join(" "), voiceId, signal)
         : null;
 
     try {
@@ -278,8 +314,18 @@ export function useSpeech(words: string[], mode: SpeechMode = "neural") {
   };
 
   const resumeNeural = () => {
-    audioRef.current?.play().catch(console.error);
-    store.setStatus("playing");
+    if (!audioRef.current) {
+      // blob URL foi liberado (aba ficou muito tempo em background) — re-busca do ponto atual
+      speakNeural(store.currentWordIndex >= 0 ? store.currentWordIndex : 0).catch(console.error);
+      return;
+    }
+    audioRef.current
+      .play()
+      .then(() => store.setStatus("playing"))
+      .catch(() => {
+        // blob URL expirado — re-busca do ponto atual sem interromper a experiência
+        speakNeural(store.currentWordIndex >= 0 ? store.currentWordIndex : 0).catch(console.error);
+      });
   };
 
   const stopNeural = () => {

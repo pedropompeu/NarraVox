@@ -16,7 +16,9 @@ export function PdfSectionIndex({ file, maxPages, currentPage, onNavigate }: Pdf
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
-    if (!file) { setSections([]); return; }
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setSections([]);
+    if (!file) return;
     let cancelled = false;
     setLoading(true);
     import("@/lib/pdfSections").then(({ extractSections }) =>

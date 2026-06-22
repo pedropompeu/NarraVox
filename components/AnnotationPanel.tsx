@@ -160,7 +160,7 @@ export function AnnotationPanel({
               border: "1px solid rgba(120,90,60,.10)",
             }}>
               <div style={{ fontFamily: M.serif, fontStyle: "italic", fontSize: 11, color: M.ink3, marginBottom: 4 }}>
-                "…{a.contextSnippet}…"
+                &ldquo;…{a.contextSnippet}…&rdquo;
               </div>
               <div style={{ fontFamily: M.sans, fontSize: 12, color: M.ink, lineHeight: 1.5 }}>{a.text}</div>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 6 }}>

@@ -167,7 +167,6 @@ function LibraryCard({
 
 export function CardStackHistory({
   items,
-  activeId: _activeId,
   onSelect,
   onDelete,
   onClear,
