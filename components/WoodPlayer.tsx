@@ -27,6 +27,7 @@ interface WoodPlayerProps {
   onSpeedChange: (s: number) => void;
   onVoiceChange: (id: string) => void;
   onBookmark?: () => void;
+  isPremium?: boolean;
   mobile?: boolean;
 }
 
@@ -211,6 +212,7 @@ export function WoodPlayer({
   onVoiceChange,
   onBookmark,
   isBookmarked = false,
+  isPremium = false,
   mobile = false,
 }: WoodPlayerProps) {
   const disabled = status === "idle" && totalWords === 0;
@@ -298,7 +300,7 @@ export function WoodPlayer({
               onChange={onVoiceChange}
             />
           </div>
-          <BrassSeg value={speed} onChange={onSpeedChange} disabled={disabled} />
+          <BrassSeg value={speed} onChange={onSpeedChange} disabled={disabled} isPremium={isPremium} />
         </div>
 
         {/* Row 1.5 — Presets de velocidade nomeados */}
@@ -380,6 +382,7 @@ export function WoodPlayer({
           <SleepTimer
             isPlaying={status === "playing"}
             onStop={onStop}
+            isPremium={isPremium}
           />
         </div>
       </div>

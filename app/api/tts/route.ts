@@ -6,15 +6,26 @@ import type { WordTiming } from "@/lib/ttsTypes";
 export const runtime = "nodejs";
 export const maxDuration = 60;
 
-// Rate limiting em memória — protege contra abuse na instância atual.
-// Em Vercel serverless cada instância tem seu próprio estado; sem Redis,
-// o limite não é compartilhado entre instâncias paralelas. Suficiente para MVP.
-// Para produção escalada: substituir por Upstash Redis ou Vercel KV.
-const RATE_WINDOW_MS = 5 * 60 * 1000; // 5 minutos
-const RATE_MAX = 20; // requisições por janela por IP
+// ── Rate limiting por texto · janela de 24h ────────────────────────────────
+//
+// Modelo: cada (IP, hash do texto, voz) pode ser processado 1× por 24h.
+// Se o mesmo IP solicitar o mesmo chunk dentro da janela, recebe 429.
+// Teto diário por IP: DAILY_MAX requisições únicas de texto (chunks distintos).
+//
+// Limitação: estado em memória por instância serverless — sem Redis, não é
+// compartilhado entre instâncias paralelas da Vercel. Suficiente para MVP.
+// Para escala: substituir por Upstash Redis ou Vercel KV.
 
-interface RateEntry { count: number; windowStart: number }
-const rateMap = new Map<string, RateEntry>();
+const DAY_MS = 24 * 60 * 60 * 1000;
+const DAILY_MAX = 120; // chunks únicos por IP por dia (≈ 10–20 artigos longos)
+
+interface TextRecord { processedAt: number }
+interface DailyRecord { count: number; dayStart: number }
+
+// ip:textHash → quando foi processado pela última vez
+const textCache = new Map<string, TextRecord>();
+// ip → contador diário
+const dailyMap  = new Map<string, DailyRecord>();
 
 function getClientIp(req: NextRequest): string {
   return (
@@ -24,27 +35,61 @@ function getClientIp(req: NextRequest): string {
   );
 }
 
-function checkRateLimit(ip: string): { allowed: boolean; retryAfterSec: number } {
+// Hash leve: soma de charCodes mod 2^32 — não precisa ser criptográfico
+function hashText(text: string, voice: string): string {
+  let h = 0x811c9dc5;
+  const s = text + "|" + voice;
+  for (let i = 0; i < s.length; i++) {
+    h ^= s.charCodeAt(i);
+    h = (h * 0x01000193) >>> 0;
+  }
+  return h.toString(16);
+}
+
+function cleanupStale(now: number): void {
+  // Limpeza ocasional para não vazar memória
+  if (textCache.size > 5_000) {
+    for (const [k, v] of textCache)
+      if (now - v.processedAt > DAY_MS) textCache.delete(k);
+  }
+  if (dailyMap.size > 2_000) {
+    for (const [k, v] of dailyMap)
+      if (now - v.dayStart > DAY_MS) dailyMap.delete(k);
+  }
+}
+
+interface RateResult {
+  allowed: boolean;
+  reason: "ok" | "duplicate" | "daily_quota";
+  retryAfterSec: number;
+}
+
+function checkRateLimit(ip: string, textHash: string): RateResult {
   const now = Date.now();
-  const entry = rateMap.get(ip);
+  cleanupStale(now);
 
-  if (!entry || now - entry.windowStart > RATE_WINDOW_MS) {
-    rateMap.set(ip, { count: 1, windowStart: now });
-    if (rateMap.size > 1000) {
-      for (const [k, v] of rateMap) {
-        if (now - v.windowStart > RATE_WINDOW_MS) rateMap.delete(k);
-      }
+  // 1. Mesmo texto já processado nas últimas 24h por este IP (verifica antes de debitar cota)
+  const cacheKey = `${ip}:${textHash}`;
+  const cached = textCache.get(cacheKey);
+  if (cached && now - cached.processedAt < DAY_MS) {
+    const retryAfterSec = Math.ceil((DAY_MS - (now - cached.processedAt)) / 1000);
+    return { allowed: false, reason: "duplicate", retryAfterSec };
+  }
+
+  // 2. Teto diário por IP (só debita se não for duplicata)
+  const daily = dailyMap.get(ip);
+  if (!daily || now - daily.dayStart > DAY_MS) {
+    dailyMap.set(ip, { count: 1, dayStart: now });
+  } else {
+    if (daily.count >= DAILY_MAX) {
+      const retryAfterSec = Math.ceil((DAY_MS - (now - daily.dayStart)) / 1000);
+      return { allowed: false, reason: "daily_quota", retryAfterSec };
     }
-    return { allowed: true, retryAfterSec: 0 };
+    daily.count++;
   }
 
-  if (entry.count >= RATE_MAX) {
-    const retryAfterSec = Math.ceil((RATE_WINDOW_MS - (now - entry.windowStart)) / 1000);
-    return { allowed: false, retryAfterSec };
-  }
-
-  entry.count++;
-  return { allowed: true, retryAfterSec: 0 };
+  textCache.set(cacheKey, { processedAt: now });
+  return { allowed: true, reason: "ok", retryAfterSec: 0 };
 }
 
 
@@ -112,20 +157,61 @@ function drainTtsStreams(
   });
 }
 
+async function isPremiumUser(req: NextRequest): Promise<boolean> {
+  try {
+    const auth = req.headers.get("Authorization");
+    if (!auth?.startsWith("Bearer ")) return false;
+    const token = auth.slice(7);
+
+    // Verifica JWT e busca perfil via service_role (server-only)
+    const { createClient } = await import("@supabase/supabase-js");
+    const admin = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+      { auth: { autoRefreshToken: false, persistSession: false } }
+    );
+
+    const { data: { user }, error } = await admin.auth.getUser(token);
+    if (error || !user) return false;
+
+    const { data: profile } = await admin
+      .from("profiles")
+      .select("premium")
+      .eq("id", user.id)
+      .single();
+
+    return profile?.premium === true;
+  } catch {
+    return false;
+  }
+}
+
 export async function POST(req: NextRequest) {
   const ip = getClientIp(req);
-  const { allowed, retryAfterSec } = checkRateLimit(ip);
-  if (!allowed) {
-    return new Response("Limite de requisições atingido. Tente novamente em breve.", {
-      status: 429,
-      headers: { "Retry-After": String(retryAfterSec) },
-    });
-  }
-
-  const { text, voice } = (await req.json()) as { text: string; voice?: string };
+  const body = (await req.json()) as { text: string; voice?: string };
+  const { text, voice } = body;
 
   if (!text?.trim()) {
     return new Response("text required", { status: 400 });
+  }
+
+  // Usuário Premium: sem rate limit
+  const premium = await isPremiumUser(req);
+
+  if (!premium) {
+    const textHash = hashText(text, voice ?? "pt-BR-FranciscaNeural");
+    const { allowed, reason, retryAfterSec } = checkRateLimit(ip, textHash);
+
+    if (!allowed) {
+      const message =
+        reason === "duplicate"
+          ? "Este trecho já foi processado nas últimas 24 horas. Tente novamente amanhã."
+          : "Limite diário de áudio atingido. Retome amanhã ou considere o plano Premium.";
+      return new Response(message, {
+        status: 429,
+        headers: { "Retry-After": String(retryAfterSec), "X-Premium-Required": "1" },
+      });
+    }
   }
 
   try {

@@ -1,256 +1,341 @@
 /* ============================================================
-   NarraVox — Design Tokens
-   v1.0 · 2026-05-26
-   Tier 1: Primitivos → Tier 2: Semânticos → Tier 3: Componentes
+   NarraVox Tátil — Design Tokens (canonical reference)
+   v2.0 · 2026-05-30
+   Fonte da verdade: brand/NarraVox Tactile _standalone_.html
+   Runtime: app/globals.css + lib/designTokens.ts
    ============================================================ */
 
 /* ----------------------------------------------------------
-   TIER 1 — PRIMITIVOS
-   Valores brutos. Nunca referenciar diretamente em componentes.
+   TIER 1 — PALETA PRIMITIVA
+   Materiais de marca. Nunca usar diretamente em componentes.
    ---------------------------------------------------------- */
 :root {
-  /* Blues */
-  --color-blue-50: #EFF6FF;
-  --color-blue-100: #DBEAFE;
-  --color-blue-200: #BFDBFE;
-  --color-blue-400: #60A5FA;
-  --color-blue-500: #3B82F6;
-  --color-blue-600: #2563EB;
-  --color-blue-700: #1D4ED8;
 
-  /* Slate (escala de cinza principal) */
-  --color-slate-50: #F8FAFC;
-  --color-slate-100: #F1F5F9;
-  --color-slate-200: #E2E8F0;
-  --color-slate-300: #CBD5E1;
-  --color-slate-400: #94A3B8;
-  --color-slate-500: #64748B;
-  --color-slate-600: #475569;
-  --color-slate-700: #334155;
-  --color-slate-800: #1E293B;
-  --color-slate-900: #0F172A;
+  /* ── Tintas (ink scale) ─────────────────────────────────── */
+  --color-ink-900: #2A1D14;   /* ink — texto principal */
+  --color-ink-700: #4A382B;   /* ink-2 — texto secundário */
+  --color-ink-500: #6B5544;   /* ink-3 — texto terciário */
+  --color-ink-300: #9A8775;   /* ink-muted — placeholders */
 
-  /* Neutros absolutos */
-  --color-white: #FFFFFF;
-  --color-off-white: #F9F8F6; /* temperatura de papel — não branco puro */
+  /* ── Maçã (Apple Play button) ──────────────────────────── */
+  --color-apple-hi:   #FF7A6E;  /* topo especular */
+  --color-apple-mid:  #D32F2F;  /* ventre */
+  --color-apple-low:  #9B1717;  /* sombra radial */
+  --color-apple-deep: #5E0A0A;  /* base / profundidade */
 
-  /* Status */
-  --color-emerald-100: #D1FAE5;
-  --color-emerald-500: #10B981;
-  --color-red-100: #FEE2E2;
-  --color-red-500: #EF4444;
-  --color-amber-100: #FEF3C7;
-  --color-amber-500: #F59E0B;
+  /* ── Latão & Ouro (brass + gold) ───────────────────────── */
+  --color-brass:       #B8860B;
+  --color-brass-light: #E0B453;
+  --color-brass-deep:  #7F5C05;
+  --color-gold:        #F4C859;  /* polished gold thumb */
 
-  /* Tipografia */
-  --font-primary: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
-  --font-mono: 'Geist Mono', 'Fira Code', monospace;
+  /* ── Vidro (glass accent) ──────────────────────────────── */
+  --color-glass:       #3B82F6;  /* destaque azul */
+  --color-glass-light: #60A5FA;  /* dark mode / hover */
 
-  /* Escala tipográfica */
-  --text-xs: 0.75rem;    /* 12px */
-  --text-sm: 0.875rem;   /* 14px */
-  --text-base: 1rem;     /* 16px */
-  --text-lg: 1.125rem;   /* 18px — body de leitura */
-  --text-xl: 1.25rem;    /* 20px */
-  --text-2xl: 1.5rem;    /* 24px */
-  --text-3xl: 1.875rem;  /* 30px */
-  --text-4xl: 2.25rem;   /* 36px */
+  /* ── Superfícies materiais ─────────────────────────────── */
+  --color-paper:      #F5F3EF;   /* papel base */
+  --color-paper-edge: #E8E2D6;   /* borda / dobra */
+  --color-linen:      #EFE6D5;   /* linho quente */
+  --color-wood:       #D4A574;   /* madeira clara */
+  --color-wood-deep:  #A07748;   /* madeira escura */
+  --color-wood-edge:  #85603A;   /* borda de corte */
+  --color-ceramic:    #E8DCC8;   /* cerâmica cream */
+  --color-ceramic-hi: #FAF2E4;   /* highlight cerâmica */
+  --color-concrete:   #A8A095;   /* concreto */
+  --color-ash:        #37312A;   /* cinza quente escuro */
 
-  /* Pesos */
-  --font-regular: 400;
-  --font-medium: 500;
-  --font-semibold: 600;
-  --font-bold: 700;
-
-  /* Espaçamento (base-4 system) */
-  --space-1: 0.25rem;
-  --space-2: 0.5rem;
-  --space-3: 0.75rem;
-  --space-4: 1rem;
-  --space-5: 1.25rem;
-  --space-6: 1.5rem;
-  --space-8: 2rem;
-  --space-10: 2.5rem;
-  --space-12: 3rem;
-  --space-16: 4rem;
-  --space-20: 5rem;
-  --space-24: 6rem;
-
-  /* Border radius */
-  --radius-sm: 4px;
-  --radius-md: 6px;
-  --radius-lg: 8px;      /* máximo em containers */
-  --radius-full: 9999px;
-
-  /* Sombras mínimas */
-  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06);
-  --shadow-md: 0 2px 8px rgba(15, 23, 42, 0.08);
-
-  /* Motion */
-  --duration-fast: 100ms;
-  --duration-base: 150ms;
-  --duration-slow: 250ms;
-  --ease-default: cubic-bezier(0.4, 0, 0.2, 1);
-  --ease-in: cubic-bezier(0.4, 0, 1, 1);
-  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  /* ── Status ────────────────────────────────────────────── */
+  --color-success: #3F7A1F;
+  --color-error:   #C5390A;
 }
 
 /* ----------------------------------------------------------
-   TIER 2 — SEMÂNTICOS
-   Aliases com intenção. Usar estes em componentes.
+   TIER 2 — TOKENS SEMÂNTICOS
+   Respondem ao tema. Usar estes em componentes.
    ---------------------------------------------------------- */
 :root {
-  /* Backgrounds */
-  --bg-page: var(--color-off-white);
-  --bg-surface: var(--color-white);
-  --bg-surface-raised: var(--color-white);
-  --bg-muted: var(--color-slate-100);
-  --bg-inverse: var(--color-slate-900);
-  --bg-accent: var(--color-blue-50);
+  /* Inks (modo claro) */
+  --ink:       var(--color-ink-900);
+  --ink-2:     var(--color-ink-700);
+  --ink-3:     var(--color-ink-500);
+  --ink-muted: var(--color-ink-300);
 
-  /* Texto */
-  --text-primary: var(--color-slate-900);
-  --text-secondary: var(--color-slate-600);
-  --text-muted: var(--color-slate-400);
-  --text-inverse: var(--color-white);
-  --text-accent: var(--color-blue-600);
-  --text-placeholder: var(--color-slate-400);
+  /* Superfícies */
+  --paper:      var(--color-paper);
+  --paper-edge: var(--color-paper-edge);
+  --linen-warm: var(--color-linen);
 
-  /* Bordas */
-  --border-default: var(--color-slate-200);
-  --border-strong: var(--color-slate-300);
-  --border-accent: var(--color-blue-300);
-  --border-focus: var(--color-blue-500);
+  /* Materiais temáticos */
+  --ceramic:  var(--color-ceramic);
+  --concrete: var(--color-concrete);
+  --ash:      var(--color-ash);
 
   /* Acento */
-  --accent-primary: var(--color-blue-500);
-  --accent-primary-hover: var(--color-blue-600);
-  --accent-primary-active: var(--color-blue-700);
-  --accent-primary-subtle: var(--color-blue-50);
-
-  /* Word Highlighting — feature central */
-  --highlight-word-bg: var(--color-blue-100);
-  --highlight-word-text: var(--color-blue-700);
-  --highlight-word-border: var(--color-blue-200);
+  --accent-primary: var(--color-glass);
 
   /* Status */
-  --status-success: var(--color-emerald-500);
-  --status-success-bg: var(--color-emerald-100);
-  --status-error: var(--color-red-500);
-  --status-error-bg: var(--color-red-100);
-  --status-warning: var(--color-amber-500);
-  --status-warning-bg: var(--color-amber-100);
+  --status-success: var(--color-success);
+  --status-error:   var(--color-error);
 }
 
-/* Dark mode */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg-page: var(--color-slate-900);
-    --bg-surface: var(--color-slate-800);
-    --bg-surface-raised: var(--color-slate-700);
-    --bg-muted: var(--color-slate-800);
-    --bg-accent: rgba(59, 130, 246, 0.1);
+[data-theme="dark"] {
+  --ink:       #EDE0CE;
+  --ink-2:     #C8B49C;
+  --ink-3:     #9A8272;
+  --ink-muted: #6A5E52;
 
-    --text-primary: var(--color-slate-50);
-    --text-secondary: var(--color-slate-300);
-    --text-muted: var(--color-slate-500);
-    --text-accent: var(--color-blue-400);
+  --paper:      #1A1410;
+  --paper-edge: #24190F;
+  --linen-warm: #1F1610;
+  --ceramic:    #2E2218;
+  --concrete:   #6A645C;
+  --ash:        #C8B49C;
 
-    --border-default: var(--color-slate-700);
-    --border-strong: var(--color-slate-600);
-    --border-focus: var(--color-blue-400);
-
-    --accent-primary: var(--color-blue-400);
-    --accent-primary-hover: var(--color-blue-300);
-    --accent-primary-active: var(--color-blue-200);
-
-    --highlight-word-bg: rgba(59, 130, 246, 0.2);
-    --highlight-word-text: var(--color-blue-300);
-    --highlight-word-border: rgba(59, 130, 246, 0.3);
-
-    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
-    --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.4);
-  }
+  --accent-primary: var(--color-glass-light);
+  --status-success: #86EFAC;
+  --status-error:   #F87171;
 }
 
 /* ----------------------------------------------------------
-   TIER 3 — COMPONENTES
-   Tokens escopados. Zero magic numbers.
+   TIER 3 — TIPOGRAFIA
+   Fraunces (display/editorial) + Inter (UI/dados)
    ---------------------------------------------------------- */
 :root {
-  /* Button Primary */
-  --btn-primary-bg: var(--accent-primary);
-  --btn-primary-bg-hover: var(--accent-primary-hover);
-  --btn-primary-bg-active: var(--accent-primary-active);
-  --btn-primary-bg-disabled: var(--color-slate-200);
-  --btn-primary-text: var(--text-inverse);
-  --btn-primary-text-disabled: var(--text-muted);
-  --btn-primary-radius: var(--radius-md);
-  --btn-primary-px: var(--space-4);
-  --btn-primary-py: var(--space-2);
-  --btn-primary-font-size: var(--text-sm);
-  --btn-primary-font-weight: var(--font-medium);
+  --font-display: var(--font-fraunces), 'Cormorant Garamond', Georgia, serif;
+  --font-ui:      var(--font-inter), -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
 
-  /* Button Ghost */
-  --btn-ghost-bg: transparent;
-  --btn-ghost-bg-hover: var(--bg-muted);
-  --btn-ghost-bg-active: var(--color-slate-200);
-  --btn-ghost-text: var(--text-secondary);
-  --btn-ghost-text-hover: var(--text-primary);
-  --btn-ghost-radius: var(--radius-md);
+  /* Escala — base 4px grid */
+  --text-xs:  0.6875rem;  /* 11px — badges, labels */
+  --text-sm:  0.8125rem;  /* 13px — metadados, captions */
+  --text-md:  0.875rem;   /* 14px — UI padrão */
+  --text-lg:  1rem;       /* 16px — corpo */
+  --text-xl:  1.125rem;   /* 18px — body leitura */
+  --text-2xl: 1.375rem;   /* 22px — títulos de seção */
+  --text-3xl: 1.625rem;   /* 26px — logotipo */
+  --text-4xl: 2rem;       /* 32px — hero h2 */
+  --text-hero: clamp(2.375rem, 6vw, 3.875rem); /* 38–62px */
 
-  /* TextEditor */
-  --editor-bg: var(--bg-surface);
-  --editor-border: var(--border-default);
-  --editor-border-focus: var(--border-focus);
-  --editor-text: var(--text-primary);
-  --editor-placeholder: var(--text-placeholder);
-  --editor-font: var(--font-primary);
-  --editor-font-size: var(--text-lg);
-  --editor-line-height: 1.75;
-  --editor-radius: var(--radius-lg);
-  --editor-padding: var(--space-5);
+  /* Pesos */
+  --weight-regular:  400;
+  --weight-medium:   500;
+  --weight-semibold: 600;
+  --weight-bold:     700;
 
-  /* WordHighlighter */
-  --word-default-text: var(--text-primary);
-  --word-highlight-bg: var(--highlight-word-bg);
-  --word-highlight-text: var(--highlight-word-text);
-  --word-highlight-radius: 3px;
-  --word-highlight-px: 2px;
-  --word-highlight-py: 0px;
-  --word-transition: background-color var(--duration-fast) var(--ease-default);
-
-  /* AudioPlayer */
-  --player-bg: var(--bg-surface);
-  --player-border: var(--border-default);
-  --player-radius: var(--radius-lg);
-  --player-padding-x: var(--space-6);
-  --player-padding-y: var(--space-4);
-
-  /* ProgressBar */
-  --progress-track-bg: var(--color-slate-200);
-  --progress-fill-bg: var(--accent-primary);
-  --progress-thumb-color: var(--accent-primary);
-  --progress-thumb-size: 14px;
-  --progress-height: 4px;
-  --progress-radius: var(--radius-full);
-
-  /* HistoryItem */
-  --history-item-bg: var(--bg-surface);
-  --history-item-bg-hover: var(--bg-accent);
-  --history-item-border: var(--border-default);
-  --history-item-radius: var(--radius-md);
-  --history-item-px: var(--space-4);
-  --history-item-py: var(--space-3);
-
-  /* Badge */
-  --badge-bg: var(--bg-muted);
-  --badge-text: var(--text-secondary);
-  --badge-success-bg: var(--status-success-bg);
-  --badge-success-text: var(--color-emerald-500);
-  --badge-radius: var(--radius-full);
-  --badge-px: var(--space-3);
-  --badge-py: var(--space-1);
-  --badge-font-size: var(--text-xs);
-  --badge-font-weight: var(--font-medium);
+  /* Kerning editorial */
+  --tracking-display: -0.03em;
+  --tracking-title:   -0.02em;
+  --tracking-ui:      -0.005em;
+  --tracking-badge:    0.04em;
 }
+
+/* ----------------------------------------------------------
+   TIER 4 — ESPAÇAMENTO & LAYOUT (grid de 8px)
+   ---------------------------------------------------------- */
+:root {
+  --space-1:  4px;
+  --space-2:  8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-5:  20px;
+  --space-6:  24px;
+  --space-8:  32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+  --space-24: 96px;
+
+  /* Radius — generosos conforme spec Tátil */
+  --radius-xs:  4px;
+  --radius-sm:  8px;    /* controles pequenos */
+  --radius-md:  10px;   /* inputs */
+  --radius-lg:  12px;   /* cards secundários */
+  --radius-xl:  16px;   /* painéis */
+  --radius-2xl: 20px;   /* cards auth/modais */
+  --radius-3xl: 22px;   /* WoodPlayer externo */
+  --radius-full: 9999px;
+}
+
+/* ----------------------------------------------------------
+   TIER 5 — SOMBRAS FÍSICAS (2–3 camadas)
+   Sombra de contato + difusa + inset highlight
+   ---------------------------------------------------------- */
+:root {
+  /* Papel flutuante */
+  --shadow-paper:
+    inset 0 1px 0 rgba(255,255,255,.85),
+    inset 0 -2px 6px rgba(120,90,60,.08),
+    0 2px 0 rgba(120,90,60,.15),
+    0 8px 24px -8px rgba(120,90,60,.30),
+    0 24px 48px -20px rgba(60,40,20,.25);
+
+  /* Linho com textura */
+  --shadow-linen:
+    inset 0 1px 0 rgba(255,255,255,.8),
+    inset 0 0 0 1px rgba(180,140,90,.25),
+    0 1px 0 rgba(255,255,255,.5);
+
+  /* WoodPlayer */
+  --shadow-wood:
+    inset 0 2px 0 rgba(255,235,200,.45),
+    inset 0 -2px 0 rgba(60,30,10,.35),
+    0 2px 4px rgba(60,30,10,.25),
+    0 24px 48px -16px rgba(60,30,10,.45);
+
+  /* Botão Ouvir (Apple) — rest */
+  --shadow-apple-rest:
+    0 18px 36px -8px rgba(120,20,20,.55),
+    0 6px 12px rgba(80,15,15,.28),
+    0 1px 2px rgba(0,0,0,.30),
+    inset 0 -10px 18px rgba(0,0,0,.30),
+    inset 0 6px 14px rgba(255,255,255,.22);
+
+  /* Botão Ouvir (Apple) — press */
+  --shadow-apple-press:
+    0 4px 10px rgba(120,20,20,.35),
+    0 1px 2px rgba(0,0,0,.4),
+    inset 0 -4px 10px rgba(0,0,0,.22),
+    inset 0 3px 8px rgba(255,255,255,.18);
+
+  /* Latão (BrassSeg) */
+  --shadow-brass:
+    inset 0 1px 0 rgba(255,235,170,.65),
+    inset 0 -1px 0 rgba(60,40,10,.40),
+    0 2px 4px rgba(80,55,5,.35),
+    0 6px 14px -6px rgba(80,55,5,.4);
+
+  /* Cerâmica (CeramicSelect) */
+  --shadow-ceramic:
+    inset 0 1px 3px rgba(120,90,60,.25),
+    inset 0 -1px 0 rgba(255,255,255,.6);
+
+  /* Concreto (track) */
+  --shadow-concrete:
+    inset 0 1px 2px rgba(40,30,20,.45),
+    inset 0 -1px 0 rgba(255,255,255,.20);
+
+  /* Glass btn */
+  --shadow-glass-btn:
+    inset 0 1px 0 rgba(255,255,255,.35),
+    inset 0 -1px 0 rgba(20,50,140,.40),
+    0 2px 4px rgba(29,78,216,.35),
+    0 8px 20px -6px rgba(29,78,216,.55);
+}
+
+/* ----------------------------------------------------------
+   TIER 6 — MOTION
+   cubic-bezier(.2,.8,.3,1.2) — "peso físico"
+   ---------------------------------------------------------- */
+:root {
+  --ease-tactile:  cubic-bezier(.2,.8,.3,1.2);
+  --ease-press:    cubic-bezier(.2,.8,.3,1.4);
+  --ease-default:  cubic-bezier(.4,0,.2,1);
+
+  --duration-instant: 80ms;
+  --duration-fast:    150ms;
+  --duration-base:    180ms;
+  --duration-slow:    250ms;
+  --duration-reveal:  400ms;
+}
+
+/* ----------------------------------------------------------
+   TIER 7 — TOKENS DE COMPONENTE
+   Mapeamento nominal. Referenciar estes nos componentes.
+   ---------------------------------------------------------- */
+:root {
+
+  /* ApplePlay (botão Ouvir — maçã) */
+  --apple-bg-rest:    radial-gradient(circle at 50% 55%, var(--color-apple-mid) 0%, var(--color-apple-low) 65%, var(--color-apple-deep) 100%);
+  --apple-bg-disabled: radial-gradient(circle at 50% 55%, var(--color-ink-300) 0%, var(--color-ink-500) 70%, var(--color-ink-700) 100%);
+  --apple-lift-hover: -3px;
+  --apple-lift-press: 1px;
+  --apple-scale-hover: 1.03;
+  --apple-scale-press: 0.97;
+  --apple-transition: transform var(--duration-base) var(--ease-tactile);
+
+  /* LinenEditor */
+  --editor-bg:       var(--linen-warm);
+  --editor-focus-ring: 0 0 0 3px rgba(59,130,246,.25);
+  --editor-inset-top:  inset 0 8px 14px -4px rgba(120,90,60,.12);
+  --editor-font:     var(--font-display);
+  --editor-font-size: var(--text-xl);
+  --editor-line-height: 1.75;
+  --editor-radius:   var(--radius-lg);
+
+  /* WoodPlayer */
+  --player-outer-radius: var(--radius-3xl);
+  --player-inner-radius: var(--radius-xl);
+  --player-glass-bg:
+    linear-gradient(180deg, rgba(255,250,240,.55) 0%, rgba(255,245,225,.35) 100%);
+
+  /* GelReader (palavra atual) */
+  --gel-word-bg:
+    linear-gradient(180deg, rgba(59,130,246,.22) 0%, rgba(59,130,246,.14) 100%);
+  --gel-word-border: rgba(59,130,246,.30);
+  --gel-word-glow:   0 0 10px rgba(59,130,246,.25);
+  --gel-word-highlight:
+    inset 0 1px 0 rgba(255,255,255,.6),
+    inset 0 -1px 0 rgba(29,78,216,.12);
+  --gel-word-radius: var(--radius-xs);
+
+  /* CeramicSelect */
+  --ceramic-select-radius: var(--radius-md);
+
+  /* BrassSeg — tab ativa */
+  --brass-tab-active-bg:
+    linear-gradient(180deg, #FFF6DD 0%, #F4DAA0 50%, #C99B36 100%);
+  --brass-tab-active-shadow:
+    inset 0 1px 0 rgba(255,255,255,.7),
+    inset 0 -1px 0 rgba(120,80,5,.30),
+    0 1px 1px rgba(60,40,5,.30);
+
+  /* ConcreteTrack — preenchimento azul */
+  --track-fill-bg:
+    linear-gradient(180deg, #74A7FB 0%, #3B82F6 55%, #2257C7 100%);
+  --track-fill-glow: 0 0 12px rgba(59,130,246,.35);
+
+  /* GoldThumb */
+  --thumb-bg:
+    radial-gradient(circle at 35% 30%, #FFF1B3 0%, #F4C859 50%, #B8860B 100%);
+  --thumb-shadow:
+    inset 0 1px 0 rgba(255,255,255,.5),
+    inset 0 -1px 1px rgba(80,55,5,.6),
+    0 3px 6px rgba(60,40,5,.45),
+    0 0 0 1.5px rgba(255,255,255,.20);
+  --thumb-size: 18px;
+
+  /* CardStackHistory */
+  --card-hover-rotate: 0deg;
+  --card-rest-rotate-odd: 0.4deg;
+  --card-rest-rotate-even: -0.4deg;
+  --card-hover-lift: -4px;
+
+  /* Focus ring global */
+  --focus-ring: 0 0 0 3px rgba(59,130,246,.25);
+  --focus-ring-offset: 2px;
+
+  /* Auth inputs */
+  --input-linen-shadow:
+    inset 0 2px 4px rgba(120,90,60,.18),
+    inset 0 -1px 0 rgba(255,255,255,.7);
+  --input-linen-focus-shadow:
+    inset 0 1px 3px rgba(120,90,60,.20),
+    inset 0 -1px 0 rgba(255,255,255,.6),
+    0 0 0 3px rgba(59,130,246,.22);
+}
+
+/* ----------------------------------------------------------
+   SUPERFÍCIES (composições prontas para uso)
+   Usar via lib/designTokens.ts → surface.linen / .paper etc.
+   Os SVG tiles são definidos em designTokens.ts como data URIs.
+   ---------------------------------------------------------- */
+
+/*
+  surface.linen  → LINEN_TILE + radial highlight + linear(paper-edge → linen-warm)
+  surface.paper  → PAPER_TILE + radial highlight + linear(paper-edge → linen-warm)
+  surface.wood   → WOOD_TILE  + linear(#E4B987 → #A07748)
+  surface.brass  → BRASS_TILE + linear(#E5BC60 → #7F5C05)
+  surface.ceramic → radial highlight + linear(#F2E7D2 → #DCC9A8)
+  surface.concrete → CONCRETE_TILE + linear(#B6AFA3 → #8A8377)
+*/

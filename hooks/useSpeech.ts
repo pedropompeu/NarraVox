@@ -21,13 +21,34 @@ interface ChunkAudio {
   timings: WordTiming[];
 }
 
+async function getAccessToken(): Promise<string | null> {
+  try {
+    const { createClient } = await import("@/lib/supabase/client");
+    const supabase = createClient();
+    const { data } = await supabase.auth.getSession();
+    return data.session?.access_token ?? null;
+  } catch {
+    return null;
+  }
+}
+
 async function fetchChunk(text: string, voiceId: string): Promise<ChunkAudio> {
+  const token = await getAccessToken();
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  if (token) headers["Authorization"] = `Bearer ${token}`;
+
   const res = await fetch("/api/tts", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers,
     body: JSON.stringify({ text, voice: voiceId }),
   });
-  if (!res.ok) throw new Error(`TTS ${res.status}`);
+  if (!res.ok) {
+    const msg = await res.text().catch(() => "");
+    const err = new Error(`TTS ${res.status}:${msg}`) as Error & { status: number; premiumRequired: boolean };
+    err.status = res.status;
+    err.premiumRequired = res.headers.get("X-Premium-Required") === "1";
+    throw err;
+  }
   const { audio, timings } = (await res.json()) as { audio: string; timings: WordTiming[] };
   const bytes = Uint8Array.from(atob(audio), (c) => c.charCodeAt(0));
   const url = URL.createObjectURL(new Blob([bytes], { type: "audio/mpeg" }));
@@ -161,8 +182,14 @@ export function useSpeech(words: string[], mode: SpeechMode = "neural") {
     let first: ChunkAudio;
     try {
       first = await fetchChunk(chunks[startChunkIdx].slice(seekWithinChunk).join(" "), voiceId);
-    } catch {
-      if (gen === generationRef.current) store.setStatus("idle");
+    } catch (e) {
+      if (gen === generationRef.current) {
+        store.setStatus("idle");
+        const err = e as { status?: number; premiumRequired?: boolean };
+        if (err.status === 429) {
+          store.setRateLimitReason(err.premiumRequired ? "daily_quota" : "duplicate");
+        }
+      }
       return;
     }
     if (gen !== generationRef.current) { URL.revokeObjectURL(first.url); return; }

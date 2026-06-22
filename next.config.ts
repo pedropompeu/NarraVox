@@ -20,7 +20,8 @@ const securityHeaders = [
       "font-src 'self'",
       "img-src 'self' data:",
       // blob: necessário para playback de áudio via URL.createObjectURL
-      "connect-src 'self'",
+      // *.supabase.co: auth, database e realtime do Supabase (browser → servidor externo)
+      "connect-src 'self' https://*.supabase.co wss://*.supabase.co",
       "media-src 'self' blob:",
       // worker-src: pdf.js worker servido localmente em /pdf.worker.min.mjs
       "worker-src 'self' blob:",
